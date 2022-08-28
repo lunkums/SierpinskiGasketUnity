@@ -52,12 +52,17 @@ public class SierpinskiGasket : MonoBehaviour
     {
         Triangle outer = new Triangle(largeTriangleSize, Vector2.zero);
         Vector2 currentPoint = Initialize(outer);
+        Vector2 randomVertex, betweenPoint;
+        float colorRatio,
+            maxDistance = Vector2.Distance(outer.TopMiddle, outer.BottomLeft);
 
         for (int i = 0; i < points; i++)
         {
-            Vector2 randomVertex = outer.GetRandomVertex();
-            Vector2 betweenPoint = (currentPoint + randomVertex) / 2;
-            GL.Color(Color.green);
+            randomVertex = outer.GetRandomVertex();
+            betweenPoint = (currentPoint + randomVertex) / 2;
+            colorRatio = Vector2.Distance(betweenPoint, outer.TopMiddle) / maxDistance;
+
+            GL.Color(new Color(colorRatio, 1 - colorRatio, 0));
             SubmitTriangle(new Triangle(smallTriangleSize, betweenPoint));
             currentPoint = betweenPoint;
         }
