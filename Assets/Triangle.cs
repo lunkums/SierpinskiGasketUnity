@@ -18,19 +18,21 @@ public struct Triangle
 
 public static class TriangleExtensions
 {
-    public static Vector2 GetRandomVertex(this Triangle triangle)
+    public static Vector2 GetRandomVertex(this Triangle triangle,
+        System.Random random)
     {
-        int randomNum = Random.Range(0, 3);
+        int randomNum = random.Next(3);
         return randomNum == 0 ? triangle.BottomLeft : randomNum == 1
             ? triangle.TopMiddle : triangle.BottomRight;
     }
 
-    public static Vector2 GetRandomPointWithin(this Triangle triangle)
+    public static Vector2 GetRandomPointWithin(this Triangle triangle,
+        System.Random random)
     {
         Vector2 a = triangle.TopMiddle - triangle.BottomLeft;
         Vector2 b = triangle.BottomRight - triangle.BottomLeft;
-        float u1 = Random.Range(0, 1);
-        float u2 = Random.Range(0, 1);
+        float u1 = (float)random.NextDouble();
+        float u2 = (float)random.NextDouble();
 
         if (u1 + u2 > 1)
         {
@@ -38,6 +40,6 @@ public static class TriangleExtensions
             u2 = 1 - u2;
         }
 
-        return u1 * a + u2 * b;
+        return (u1 * a + u2 * b) + triangle.BottomLeft;
     }
 }

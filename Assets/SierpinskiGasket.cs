@@ -5,6 +5,7 @@ public class SierpinskiGasket : MonoBehaviour
     [SerializeField][Range(0, 10000)] private int points = 1000;
     [SerializeField][Range(1, 5)] private float largeTriangleSize = 3.0f;
     [SerializeField][Range(0.001f, 0.01f)] private float smallTriangleSize = 0.01f;
+    [SerializeField][Min(0)] private int seed = 8080;
 
     private Material lineMaterial;
 
@@ -51,14 +52,15 @@ public class SierpinskiGasket : MonoBehaviour
     private void SubmitGasket()
     {
         Triangle outer = new Triangle(largeTriangleSize, Vector2.zero);
-        Vector2 currentPoint = Initialize(outer);
+        System.Random random = new System.Random(seed);
+        Vector2 currentPoint = Initialize(outer, random);
         Vector2 randomVertex, betweenPoint;
         float colorRatio,
             maxDistance = Vector2.Distance(outer.TopMiddle, outer.BottomLeft);
 
         for (int i = 0; i < points; i++)
         {
-            randomVertex = outer.GetRandomVertex();
+            randomVertex = outer.GetRandomVertex(random);
             betweenPoint = (currentPoint + randomVertex) / 2;
             colorRatio = Vector2.Distance(betweenPoint, outer.TopMiddle) / maxDistance;
 
@@ -68,10 +70,10 @@ public class SierpinskiGasket : MonoBehaviour
         }
     }
 
-    private Vector2 Initialize(Triangle triangle)
+    private Vector2 Initialize(Triangle triangle, System.Random random)
     {
         SubmitTriangle(triangle);
-        return triangle.GetRandomPointWithin();
+        return triangle.GetRandomPointWithin(random);
     }
 
     private void SubmitTriangle(Triangle triangle)
