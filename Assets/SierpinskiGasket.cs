@@ -2,17 +2,72 @@ using UnityEngine;
 
 public class SierpinskiGasket : MonoBehaviour
 {
-    [SerializeField][Range(0, 10000)] private int points = 1000;
+    [SerializeField][Range(0, 10000)] private int maxPoints = 1000;
     [SerializeField][Range(1, 5)] private float largeTriangleSize = 3.0f;
     [SerializeField][Range(0.001f, 0.01f)] private float smallTriangleSize = 0.01f;
     [SerializeField][Min(0)] private int seed = 8080;
+    [SerializeField][Range(0, 0.5f)] private float secondsBetweenFill = 0.1f;
+    [SerializeField][Range(0.001f, 0.1f)] private float percentageOfPointsToFill = 0.1f;
 
     private Material lineMaterial;
+    private int currentPoints;
+    private float timer;
+
+    private int Points
+    {
+        get => currentPoints;
+        set => currentPoints = Mathf.Min(value, maxPoints);
+    }
+
+    public int MaxPoints
+    {
+        set
+        {
+            maxPoints = value;
+            ReplayAnimation();
+        }
+    }
+
+    public float FillPercentage
+    {
+        set => percentageOfPointsToFill = value;
+    }
+
+    public int Seed
+    {
+        get => seed;
+        set
+        {
+            seed = Mathf.Abs(value);
+            ReplayAnimation();
+        }
+    }
 
     private void Awake()
     {
         lineMaterial = CreateLineMaterial();
+        currentPoints = 0;
+        timer = secondsBetweenFill;
     }
+
+    private void Update()
+    {
+        timer -= Time.deltaTime;
+        if (timer <= 0)
+        {
+            Points += Mathf.CeilToInt(maxPoints * percentageOfPointsToFill);
+            timer = secondsBetweenFill;
+        }
+    }
+
+    public void ReplayAnimation()
+    {
+        Points = 0;
+    }
+
+    /*
+     * GL rendering methods
+     */
 
     private static Material CreateLineMaterial()
     {
@@ -34,7 +89,7 @@ public class SierpinskiGasket : MonoBehaviour
         return lineMaterial;
     }
 
-    public void OnRenderObject()
+    private void OnRenderObject()
     {
         lineMaterial.SetPass(0);
 
@@ -49,6 +104,10 @@ public class SierpinskiGasket : MonoBehaviour
         GL.PopMatrix();
     }
 
+    /*
+     * Gasket rendering methods
+     */
+
     private void SubmitGasket()
     {
         Triangle outer = new Triangle(largeTriangleSize, Vector2.zero);
@@ -58,7 +117,7 @@ public class SierpinskiGasket : MonoBehaviour
         float colorRatio,
             maxDistance = Vector2.Distance(outer.topMiddle, outer.bottomLeft);
 
-        for (int i = 0; i < points; i++)
+        for (int i = 0; i < Points; i++)
         {
             randomVertex = outer.GetRandomVertex(random);
             betweenPoint = (currentPoint + randomVertex) / 2;
@@ -68,6 +127,8 @@ public class SierpinskiGasket : MonoBehaviour
             SubmitTriangle(new Triangle(smallTriangleSize, betweenPoint));
             currentPoint = betweenPoint;
         }
+
+        Points++;
     }
 
     private Vector2 Initialize(Triangle triangle, System.Random random)
