@@ -12,6 +12,15 @@ public class SierpinskiGasket : MonoBehaviour
     private Material lineMaterial;
     private int currentPoints;
     private float timer;
+    private bool manualMode;
+
+    private void Awake()
+    {
+        lineMaterial = CreateLineMaterial();
+        currentPoints = 0;
+        timer = secondsBetweenFill;
+        manualMode = true;
+    }
 
     private int Points
     {
@@ -24,7 +33,14 @@ public class SierpinskiGasket : MonoBehaviour
         set
         {
             maxPoints = value;
-            ReplayAnimation();
+            if (manualMode)
+            {
+                ReplayAnimation();
+            }
+            else
+            {
+                currentPoints = maxPoints;
+            }
         }
     }
 
@@ -43,15 +59,23 @@ public class SierpinskiGasket : MonoBehaviour
         }
     }
 
-    private void Awake()
+    public bool ManualMode
     {
-        lineMaterial = CreateLineMaterial();
-        currentPoints = 0;
-        timer = secondsBetweenFill;
+        set
+        {
+            manualMode = value;
+            currentPoints = manualMode ? 0 : maxPoints;
+        }
     }
 
     private void Update()
     {
+        if (!manualMode)
+        {
+            seed = Random.Range(0, 999999999);
+            return;
+        }
+
         timer -= Time.deltaTime;
         if (timer <= 0)
         {
